@@ -236,4 +236,9 @@ inline bool read_landmark_data(std::string filename, std::vector<LandmarkObs>& o
 	return true;
 }
 
+inline double BivariantGaussian(double x, double y, double mu_x, double mu_y, double sigma_x, double sigma_y){
+	double prob = 1 / (2 * M_PI * sigma_x * sigma_y) * exp(-(pow((x - mu_x), 2) / (2 * sigma_x * sigma_x) + pow((y - mu_y), 2) / (2 * sigma_y * sigma_y)));
+	return prob;
+}
+
 #endif /* HELPER_FUNCTIONS_H_ */
