@@ -241,4 +241,28 @@ inline double BivariantGaussian(double x, double y, double mu_x, double mu_y, do
 	return prob;
 }
 
+inline std::vector<double> normalize_vector(std::vector<double> inputVector){
+
+	//declare sum:
+	float sum = 0.0f;
+
+	//declare and resize output vector:
+	std::vector<double> outputVector ;
+	outputVector.resize(inputVector.size());
+
+	//estimate the sum:
+	for (unsigned int i = 0; i < inputVector.size(); ++i) {
+		sum += inputVector[i];
+	}
+
+	//normalize with sum:
+	for (unsigned int i = 0; i < inputVector.size(); ++i) {
+		outputVector[i] = inputVector[i]/sum ;
+	}
+
+	//return normalized vector:
+	return outputVector ;
+}
+
+
 #endif /* HELPER_FUNCTIONS_H_ */
