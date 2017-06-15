@@ -263,6 +263,13 @@ inline std::vector<double> normalize_vector(std::vector<double> inputVector){
 	//return normalized vector:
 	return outputVector ;
 }
+template <typename T>
+inline void print_vector(std::vector<T> inputVector){
+	for(unsigned int i = 0; i < inputVector.size(); i++){
+		std::cout << inputVector[i] << " ";
+	}
+	std::cout << std::endl;
+}
 
 
 #endif /* HELPER_FUNCTIONS_H_ */

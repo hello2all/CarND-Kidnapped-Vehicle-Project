@@ -100,19 +100,25 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
   //   observed measurement to this particular landmark.
   // NOTE: this method will NOT be called by the grading code. But you will probably find it useful to 
   //   implement this method and use it as a helper during the updateWeights phase.
-  std::vector<LandmarkObs>::iterator obs_iter;
-  std::vector<LandmarkObs>::iterator pre_iter;
-  for(obs_iter = observations.begin();obs_iter!=observations.end();++obs_iter) {
-    double min_dist = 99999999;
-    for(pre_iter = predicted.begin();pre_iter!=predicted.end();++pre_iter) {
-      double distance = dist(obs_iter->x,obs_iter->y,pre_iter->x,pre_iter->y);
+  double min_dist;
+  double distance;
+  for(int i = 0; i < observations.size(); i++) {
+    min_dist = 999;
+    cout << observations[i].x << "," << observations[i].y << "->";
+    for(int j = 0; j < predicted.size(); j++) {
+      distance = dist(observations[i].x,observations[i].y,predicted[j].x,predicted[j].y);
+      cout << distance << endl;
       if (distance < min_dist) {
           min_dist = distance;
-          obs_iter->id = pre_iter->id;
-          obs_iter->x = pre_iter->x;
-          obs_iter->y = pre_iter->y;
+          observations[i].id = predicted[j].id;
+          cout << observations[i].id << endl;
+          observations[i].x = predicted[j].x;
+          observations[i].y = predicted[j].y;
       }
     }
+    cout << observations[i].x << "," << observations[i].y << observations[i].id << endl;
+    cout << min_dist << endl;
+
   }
 }
 
@@ -129,7 +135,15 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   //   3.33
   //   http://planning.cs.uiuc.edu/node99.html
 
-  for(int i; i < num_particles; i++){
+  for(int i = 0; i < num_particles; i++){
+
+    // cout << "obs" << endl;
+    // for(int j = 0; j < observations.size(); j++){
+    //   cout << observations[j].x << " " << observations[j].y << " " << endl;
+    // }
+    
+    // cout << "particle" << endl;
+    cout << "Initial particle: " << particles[i].x << " " << particles[i].y << " " << particles[i].theta << endl;
 
     // Transform
     vector<LandmarkObs> trans_observations;
@@ -143,25 +157,48 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       trans_obs.y = sin(particles[i].theta) * obs.x + cos(particles[i].theta) * obs.y + particles[i].y;
       trans_observations.push_back(trans_obs);
     }
+
+    cout << "---------------------Obs Transformations--------------------------------------------" << endl;
+    for(int j = 0; j < observations.size(); j++){
+      cout << "(" << observations[j].x << "," << observations[j].y << ")" << "->" << "(" << trans_observations[j].x << "," << trans_observations[j].y << ")" << endl;
+    }
+    
+
     // set inititial weights
-    // particles[i].weight = 1.0;
+    particles[i].weight = 1.0;
 
     // from the particle, filter out landmarks which are beyond detection range
     vector<LandmarkObs> predicted_landmarks;
     for(int j = 0; j < map_landmarks.landmark_list.size(); j++){
-      double distance = dist(particles[i].x, particles[i].y, map_landmarks.landmark_list[j].x_f, map_landmarks.landmark_list[j].y_f);
-      if(distance <= sensor_range){
+      // double distance = dist(particles[i].x, particles[i].y, map_landmarks.landmark_list[j].x_f, map_landmarks.landmark_list[j].y_f);
+      // if(distance <= sensor_range){
         LandmarkObs landmark = {map_landmarks.landmark_list[j].id_i, map_landmarks.landmark_list[j].x_f, map_landmarks.landmark_list[j].y_f};
         predicted_landmarks.push_back(landmark);
-      }
+      // }
     }
+    // cout << "sensor range: " << sensor_range << endl;
+
 
     // get the nearest point on map
     vector<LandmarkObs> associated_LandMarks = trans_observations;
+
+    // cout << "predicted landmark" << endl;
+    // for(int j = 0; j < predicted_landmarks.size(); j++){
+    //   cout << predicted_landmarks[j].id << " " << predicted_landmarks[j].x << " " << predicted_landmarks[j].y << endl;
+    // }
+
     dataAssociation(predicted_landmarks, associated_LandMarks);
+
+    cout << "---------------------Assosciations---------------------------------------------------" << endl;
+    for(int j = 0; j < associated_LandMarks.size(); j++){
+      cout << "Landmark index:" << associated_LandMarks[j].id << ";" << "(" << trans_observations[j].x << "," << trans_observations[j].y << ")" << "->" << "(" << associated_LandMarks[j].x << "," << associated_LandMarks[j].y << ")" << endl;
+    }
+    
+
     // int associations = associated_LandMarks.size();
 
     // update weights
+    cout << "---------------------Weights Calc------------------------" << endl;
     for(int j = 0; j < trans_observations.size(); j++){
 
       // calc multi-variant gaussian distribution prob
@@ -169,22 +206,28 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       double measure_y = trans_observations[j].y;
       double mu_x = associated_LandMarks[j].x;
       double mu_y = associated_LandMarks[j].y;
-      long double probability = BivariantGaussian(measure_x, measure_y, mu_x, mu_y, std_landmark[0], std_landmark[1]);
-      cout << probability << endl;
+      double probability = BivariantGaussian(measure_x, measure_y, mu_x, mu_y, std_landmark[0], std_landmark[1]);
+      // cout << probability << endl;
+      
       if(probability > 0){
         particles[i].weight *= probability;
       }
       particles[i].associations.push_back(associated_LandMarks[j].id);
       particles[i].sense_x.push_back(associated_LandMarks[j].x);
       particles[i].sense_y.push_back(associated_LandMarks[j].y);
-
+      
     }
-
-    weights[i] =  particles[i].weight;
+    // cout << "probability total" << endl;
+    // cout << particles[i].weight << endl;
+    weights[i] = particles[i].weight;
+    exit(0);
+    
   }
 
   // normalize weights
   weights = normalize_vector(weights);
+  // print_vector(weights);
+
 }
 
 void ParticleFilter::resample() {

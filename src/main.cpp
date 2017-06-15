@@ -53,7 +53,6 @@ int main()
 
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
-
       auto s = hasData(std::string(data));
       if (s != "") {
         
@@ -64,7 +63,6 @@ int main()
         if (event == "telemetry") {
           // j[1] is the data JSON object
 
-
           if (!pf.initialized()) {
 
             // Sense noisy position data from the simulator
@@ -73,6 +71,7 @@ int main()
             double sense_theta = std::stod(j[1]["sense_theta"].get<std::string>());
 
             pf.init(sense_x, sense_y, sense_theta, sigma_pos);
+            
       }
       else {
       // Predict the vehicle's next state from previous (noiseless control) data.
