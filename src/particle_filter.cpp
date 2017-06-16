@@ -144,7 +144,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     // }
     
     // cout << "particle" << endl;
-    // cout << "Initial particle: " << particles[i].x << " " << particles[i].y << " " << particles[i].theta << endl;
+    cout << "Initial particle: " << particles[i].x << " " << particles[i].y << " " << particles[i].theta << endl;
 
     // Transform
     vector<LandmarkObs> trans_observations;
