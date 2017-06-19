@@ -71,7 +71,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
   default_random_engine gen;
   double new_x, new_y, new_theta;
 
-  for(int i; i < num_particles; i++){
+  for(int i = 0; i < num_particles; i++){
     // Prediction based on yaw_rate
     if(yaw_rate == 0){
       new_x = particles[i].x + velocity * delta_t * cos(particles[i].theta);
