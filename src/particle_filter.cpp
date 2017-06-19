@@ -213,6 +213,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         particles[i].weight *= probability;
       }
 
+      particles[i].associations.clear();
+      particles[i].sense_x.clear();
+      particles[i].sense_y.clear();
+
       particles[i].associations.push_back(associated_LandMarks[j].id);
       particles[i].sense_x.push_back(associated_LandMarks[j].x);
       particles[i].sense_y.push_back(associated_LandMarks[j].y);
