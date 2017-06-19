@@ -199,17 +199,20 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     vector<int> P_associations;
     vector<double> P_sense_x;
     vector<double> P_sense_y;
+
+    const double denominator = 2. * M_PI * std_landmark[0] * std_landmark[1];
+    const double x_deno = 2. * pow(std_landmark[0], 2);
+    const double y_deno = 2. * pow(std_landmark[1], 2);
     
     for(int j = 0; j < associated_LandMarks.size(); j++){
 
       // calc multi-variant gaussian distribution prob
-      double measure_x = trans_observations[j].x;
-      double measure_y = trans_observations[j].y;
-      double mu_x = associated_LandMarks[j].x;
-      double mu_y = associated_LandMarks[j].y;
-      double sigma_x = std_landmark[0];
-      double sigma_y = std_landmark[1];
-      double probability = 1 / (2 * M_PI * sigma_x * sigma_y) * exp(-(pow((measure_x - mu_x), 2) / (2 * sigma_x * sigma_x) + pow((measure_y - mu_y), 2) / (2 * sigma_y * sigma_y)));
+      const double measure_x = trans_observations[j].x;
+      const double measure_y = trans_observations[j].y;
+      const double mu_x = associated_LandMarks[j].x;
+      const double mu_y = associated_LandMarks[j].y;
+
+      double probability = exp(-(pow(measure_x - mu_x, 2) / x_deno) - (pow(measure_y - mu_y, 2) / y_deno)) / denominator;
 
       // cout << "LandmarkIndex:" << associated_LandMarks[j].id << endl;
       // cout << "Landmark: " << mu_x << "," << mu_y << "->" << "trans_obs: " << measure_x << "," << measure_y << endl;
@@ -229,13 +232,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     weights[i] = particles[i].weight;
     particles[i] = SetAssociations(particles[i], P_associations, P_sense_x, P_sense_y);
   }
-  // // normalize weights
-  // weights = normalize_vector(weights);
-
-  // cout << "normalized weights:" << endl;
   // print_vector(weights);
-
-  // exit(0);
 }
 
 void ParticleFilter::resample() {
