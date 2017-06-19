@@ -196,6 +196,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
     // // update weights using bivariant guassian multiplication
     // cout << "---------------------Weights Calc------------------------" << endl;
+    vector<int> P_associations;
+    vector<double> P_sense_x;
+    vector<double> P_sense_y;
+    
     for(int j = 0; j < associated_LandMarks.size(); j++){
 
       // calc multi-variant gaussian distribution prob
@@ -203,7 +207,9 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       double measure_y = trans_observations[j].y;
       double mu_x = associated_LandMarks[j].x;
       double mu_y = associated_LandMarks[j].y;
-      double probability = BivariantGaussian(measure_x, measure_y, mu_x, mu_y, std_landmark[0], std_landmark[1]);
+      double sigma_x = std_landmark[0];
+      double sigma_y = std_landmark[1];
+      double probability = 1 / (2 * M_PI * sigma_x * sigma_y) * exp(-(pow((measure_x - mu_x), 2) / (2 * sigma_x * sigma_x) + pow((measure_y - mu_y), 2) / (2 * sigma_y * sigma_y)));
 
       // cout << "LandmarkIndex:" << associated_LandMarks[j].id << endl;
       // cout << "Landmark: " << mu_x << "," << mu_y << "->" << "trans_obs: " << measure_x << "," << measure_y << endl;
@@ -213,18 +219,15 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         particles[i].weight *= probability;
       }
 
-      particles[i].associations.clear();
-      particles[i].sense_x.clear();
-      particles[i].sense_y.clear();
-
-      particles[i].associations.push_back(associated_LandMarks[j].id);
-      particles[i].sense_x.push_back(associated_LandMarks[j].x);
-      particles[i].sense_y.push_back(associated_LandMarks[j].y);
+      P_associations.push_back(associated_LandMarks[j].id);
+      P_sense_x.push_back(associated_LandMarks[j].x);
+      P_sense_y.push_back(associated_LandMarks[j].y);
       
     }
     // cout << "probability total:" << endl;
     // cout << particles[i].weight << endl;
     weights[i] = particles[i].weight;
+    particles[i] = SetAssociations(particles[i], P_associations, P_sense_x, P_sense_y);
   }
   // // normalize weights
   // weights = normalize_vector(weights);
