@@ -237,32 +237,17 @@ inline bool read_landmark_data(std::string filename, std::vector<LandmarkObs>& o
 }
 
 inline double BivariantGaussian(double x, double y, double mu_x, double mu_y, double sigma_x, double sigma_y){
-	double prob = 1 / (2 * M_PI * sigma_x * sigma_y) * exp(-(pow((x - mu_x), 2) / (2 * sigma_x * sigma_x) + pow((y - mu_y), 2) / (2 * sigma_y * sigma_y)));
+	// double prob = 1 / (2 * M_PI * sigma_x * sigma_y) * exp(-(pow((x - mu_x), 2) / (2 * sigma_x * sigma_x) + pow((y - mu_y), 2) / (2 * sigma_y * sigma_y)));
+	double denominator = 2. * M_PI * sigma_x * sigma_y;
+	double x_deno = 2. * pow(sigma_x, 2);
+	double y_deno = 2. * pow(sigma_y, 2);
+	double x_diff = x - mu_x;
+	double y_diff = y - mu_y;
+
+	double prob = exp(-(pow(x_diff, 2) / x_deno) - (pow(y_diff, 2) / y_deno)) / denominator;
 	return prob;
 }
 
-inline std::vector<double> normalize_vector(std::vector<double> inputVector){
-
-	//declare sum:
-	float sum = 0.0f;
-
-	//declare and resize output vector:
-	std::vector<double> outputVector ;
-	outputVector.resize(inputVector.size());
-
-	//estimate the sum:
-	for (unsigned int i = 0; i < inputVector.size(); ++i) {
-		sum += inputVector[i];
-	}
-
-	//normalize with sum:
-	for (unsigned int i = 0; i < inputVector.size(); ++i) {
-		outputVector[i] = inputVector[i]/sum ;
-	}
-
-	//return normalized vector:
-	return outputVector ;
-}
 template <typename T>
 inline void print_vector(std::vector<T> inputVector){
 	for(unsigned int i = 0; i < inputVector.size(); i++){
